@@ -1,6 +1,6 @@
 import authRouter from "./authRouter";
 
-const routes = {
+const routes: any = {
   authRouter,
 };
 
