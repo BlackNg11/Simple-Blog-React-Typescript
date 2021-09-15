@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import { generateActiveToken } from "../config/generateToken";
 import sendMail from "../config/sendMail";
 import { validPhone, validateEmail } from "../middleware/vaild";
+import { sendSms } from "../config/sendSMS";
+import { INewUser, IDecodedToken } from "../config/interface";
 
 const CLIENT_URL = `${process.env.BASE_URL}`;
 
@@ -30,11 +32,47 @@ const authCtrl = {
         sendMail(account, url, "Verify Email");
 
         return res.json({
-          msg: "Register successfully.Plese check email",
+          msg: "Register successfully.Please check email",
+        });
+      } else if (validPhone(account)) {
+        sendSms(account, url, "Verify Your Phone number");
+
+        return res.json({
+          msg: "Register successfully.Please check phone",
         });
       }
     } catch (err: any) {
       return res.status(500).json({ msg: err.message });
+    }
+  },
+
+  activeAccount: async (req: Request, res: Response) => {
+    try {
+      const { active_token } = req.body;
+
+      const decoded = <IDecodedToken>(
+        jwt.verify(active_token, `${process.env.ACCESS_TOKEN_SECRET}`)
+      );
+
+      const { newUser } = decoded;
+
+      if (!newUser) return res.status(400).json({ msg: "Invalid authen" });
+
+      const user = new Users(newUser);
+      await user.save();
+
+      res.json({ msg: "Account has been activated" });
+    } catch (err: any) {
+      let errMsg;
+
+      if (err.code === 11000) {
+        errMsg = Object.keys(err.keyValue)[0] + " already exists";
+      } else {
+        let name = Object.keys(err.errors)[0];
+        errMsg = err.errors[`${name}`].message;
+      }
+
+      return res.status(500).json({ msg: errMsg });
     }
   },
 };
