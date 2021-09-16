@@ -19,7 +19,7 @@ const PageRender = () => {
 
   let name = '';
 
-  if(page){
+  if (page) {
     name = slug ? `${page}/[slug]` : `${page}`
   }
 
