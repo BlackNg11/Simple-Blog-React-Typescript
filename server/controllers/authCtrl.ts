@@ -9,16 +9,15 @@ import {
 } from "../config/generateToken";
 import sendMail from "../config/sendMail";
 import { validateEmail, validPhone } from "../middleware/vaild";
-import { sendSms } from "../config/sendSMS";
+import { sendSms, smsOTP, smsVerify } from "../config/sendSMS";
 import {
   IDecodedToken,
   IUser,
   IGgPayload,
   IUserParams,
 } from "../config/interface";
-
 import { OAuth2Client } from "google-auth-library";
-const fetch = require("node-fetch");
+// import fetch from "node-fetch";
 
 const client = new OAuth2Client(`${process.env.MAIL_CLIENT_ID}`);
 const CLIENT_URL = `${process.env.BASE_URL}`;
@@ -158,35 +157,72 @@ const authCtrl = {
       return res.status(500).json({ msg: err.message });
     }
   },
-  facebookLogin: async (req: Request, res: Response) => {
+  // facebookLogin: async (req: Request, res: Response) => {
+  //   try {
+  //     const { accessToken, userID } = req.body;
+
+  //     const URL = `
+  //       https://graph.facebook.com/v3.0/${userID}/?fields=id,name,email,picture&access_token=${accessToken}
+  //     `;
+
+  //     const data = await fetch(URL)
+  //       .then((res: any) => res.json())
+  //       .then((res: any) => {
+  //         return res;
+  //       });
+
+  //     const { email, name, picture } = data;
+
+  //     const password = email + "your facebook secrect password";
+  //     const passwordHash = await bcrypt.hash(password, 12);
+
+  //     const user = await Users.findOne({ account: email });
+
+  //     if (user) {
+  //       loginUser(user, password, res);
+  //     } else {
+  //       const user = {
+  //         name,
+  //         account: email,
+  //         password: passwordHash,
+  //         avatar: picture.data.url,
+  //         type: "login",
+  //       };
+  //       registerUser(user, res);
+  //     }
+  //   } catch (err: any) {
+  //     return res.status(500).json({ msg: err.message });
+  //   }
+  // },
+  loginSMS: async (req: Request, res: Response) => {
     try {
-      const { accessToken, userID } = req.body;
+      const { phone } = req.body;
+      const data = await smsOTP(phone, "sms");
+      res.json(data);
+    } catch (err: any) {
+      return res.status(500).json({ msg: err.message });
+    }
+  },
+  smsVerify: async (req: Request, res: Response) => {
+    try {
+      const { phone, code } = req.body;
 
-      const URL = `
-        https://graph.facebook.com/v3.0/${userID}/?fields=id,name,email,picture&access_token=${accessToken}
-      `;
+      const data = await smsVerify(phone, code);
+      if (!data?.valid)
+        return res.status(400).json({ msg: "Invalid Authentication." });
 
-      const data = await fetch(URL)
-        .then((res: any) => res.json())
-        .then((res: any) => {
-          return res;
-        });
-
-      const { email, name, picture } = data;
-
-      const password = email + "your facebook secrect password";
+      const password = phone + "your phone secrect password";
       const passwordHash = await bcrypt.hash(password, 12);
 
-      const user = await Users.findOne({ account: email });
+      const user = await Users.findOne({ account: phone });
 
       if (user) {
         loginUser(user, password, res);
       } else {
         const user = {
-          name,
-          account: email,
+          name: phone,
+          account: phone,
           password: passwordHash,
-          avatar: picture.data.url,
           type: "login",
         };
         registerUser(user, res);
