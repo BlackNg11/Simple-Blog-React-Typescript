@@ -17,7 +17,7 @@ export const login =
       dispatch({ type: AUTH, payload: res.data });
 
       dispatch({ type: ALERT, payload: { success: res.data.msg } });
-      localStorage.setItem("logged", "test");
+      localStorage.setItem("logged", "devat-channel");
     } catch (err: any) {
       dispatch({ type: ALERT, payload: { errors: err.response.data.msg } });
     }
@@ -45,7 +45,7 @@ export const register =
 export const refreshToken =
   () => async (dispatch: Dispatch<IAuthType | IAlertType>) => {
     const logged = localStorage.getItem("logged");
-    if (logged !== "test") return;
+    if (logged !== "devat-channel") return;
 
     try {
       dispatch({ type: ALERT, payload: { loading: true } });
@@ -66,6 +66,22 @@ export const logout =
       localStorage.removeItem("logged");
       await getAPI("logout");
       window.location.href = "/";
+    } catch (err: any) {
+      dispatch({ type: ALERT, payload: { errors: err.response.data.msg } });
+    }
+  };
+
+export const googleLogin =
+  (id_token: string) => async (dispatch: Dispatch<IAuthType | IAlertType>) => {
+    try {
+      dispatch({ type: ALERT, payload: { loading: true } });
+
+      const res = await postAPI("google_login", { id_token });
+
+      dispatch({ type: AUTH, payload: res.data });
+
+      dispatch({ type: ALERT, payload: { success: res.data.msg } });
+      localStorage.setItem("logged", "test");
     } catch (err: any) {
       dispatch({ type: ALERT, payload: { errors: err.response.data.msg } });
     }
