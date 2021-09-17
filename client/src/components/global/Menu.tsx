@@ -21,9 +21,9 @@ const Menu = () => {
   ]
 
   const navLinks = auth.access_token ? afLoginLinks : bfLoginLinks
-
+  
   const isActive = (pn: string) => {
-    if (pn === pathname) return 'active';
+    if(pn === pathname) return 'active';
   }
 
   return (
@@ -35,7 +35,7 @@ const Menu = () => {
           </li>
         ))
       }
-
+      
       {
         auth.user &&
         <li className="nav-item dropdown">
@@ -44,18 +44,27 @@ const Menu = () => {
           </span>
 
           <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><Link className="dropdown-item" to="/profile">Profile</Link></li>
+            <li>
+              <Link className="dropdown-item" 
+              to={`/profile/${auth.user._id}`}
+              >
+                Profile
+              </Link>
+            </li>
+
             <li><hr className="dropdown-divider" /></li>
+
             <li>
               <Link className="dropdown-item" to="/"
-                onClick={() => dispatch(logout())}>
+              onClick={() => dispatch(logout())}>
                 Logout
               </Link>
             </li>
+
           </ul>
         </li>
       }
-
+      
     </ul>
   )
 }
