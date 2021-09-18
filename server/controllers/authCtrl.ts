@@ -223,7 +223,7 @@ const authCtrl = {
           name: phone,
           account: phone,
           password: passwordHash,
-          type: "login",
+          type: "mobile",
         };
         registerUser(user, res);
       }
