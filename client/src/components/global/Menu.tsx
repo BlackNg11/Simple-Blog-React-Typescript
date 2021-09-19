@@ -21,9 +21,9 @@ const Menu = () => {
   ]
 
   const navLinks = auth.access_token ? afLoginLinks : bfLoginLinks
-  
+
   const isActive = (pn: string) => {
-    if(pn === pathname) return 'active';
+    if (pn === pathname) return 'active';
   }
 
   return (
@@ -35,7 +35,14 @@ const Menu = () => {
           </li>
         ))
       }
-      
+
+      {
+        auth.user?.role === 'admin' &&
+        <li className={`nav-item ${isActive("/category")}`}>
+          <Link to="/category" className="nav-link">Category</Link>
+        </li>
+      }
+
       {
         auth.user &&
         <li className="nav-item dropdown">
@@ -45,8 +52,8 @@ const Menu = () => {
 
           <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
             <li>
-              <Link className="dropdown-item" 
-              to={`/profile/${auth.user._id}`}
+              <Link className="dropdown-item"
+                to={`/profile/${auth.user._id}`}
               >
                 Profile
               </Link>
@@ -56,7 +63,7 @@ const Menu = () => {
 
             <li>
               <Link className="dropdown-item" to="/"
-              onClick={() => dispatch(logout())}>
+                onClick={() => dispatch(logout())}>
                 Logout
               </Link>
             </li>
@@ -64,7 +71,7 @@ const Menu = () => {
           </ul>
         </li>
       }
-      
+
     </ul>
   )
 }
