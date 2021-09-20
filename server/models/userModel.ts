@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      default: "register", // fast
+      default: "register", // login
     },
   },
   {
@@ -38,4 +38,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model<IUser>("User", userSchema);
+export default mongoose.model<IUser>("user", userSchema);
