@@ -1,78 +1,48 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
+import { useParams } from 'react-router-dom'
 
-import { getBlogsByCategoryId } from '../../redux/actions/blogAction'
-
-import { RootStore, IParams, IBlog } from '../../utils/TypeScript'
+import { IParams, IBlog } from '../../utils/TypeScript'
+import { getAPI } from '../../utils/FetchData'
 
 import Loading from '../../components/global/Loading'
-import Pagination from '../../components/global/Pagination'
-import CardVert from '../../components/cards/CardVert'
+import { showErrMsg } from '../../components/alert/Alert'
+import DisplayBlog from '../../components/blog/DisplayBlog'
 
+const DetailBlog = () => {
+  const id = useParams<IParams>().slug
 
-const BlogsByCategory = () => {
-  const { categories, blogsCategory } = useSelector((state: RootStore) => state)
-  const dispatch = useDispatch()
-  const { slug } = useParams<IParams>()
-
-  const [categoryId, setCategoryId] = useState('')
-  const [blogs, setBlogs] = useState<IBlog[]>()
-  const [total, setTotal] = useState(0)
-
-  const history = useHistory()
-  const { search } = history.location;
+  const [blog, setBlog] = useState<IBlog>()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const category = categories.find(item => item.name === slug)
-    if (category) setCategoryId(category._id)
-  }, [slug, categories])
+    if (!id) return;
+
+    setLoading(true)
+
+    getAPI(`blog/${id}`)
+      .then(res => {
+        setBlog(res.data)
+        setLoading(false)
+      })
+      .catch(err => {
+        setError(err.response.data.msg)
+        setLoading(false)
+      })
+
+    return () => setBlog(undefined)
+  }, [id])
 
 
-  useEffect(() => {
-    if (!categoryId) return;
-
-    if (blogsCategory.every(item => item.id !== categoryId)) {
-      dispatch(getBlogsByCategoryId(categoryId, search))
-    } else {
-      const data = blogsCategory.find(item => item.id === categoryId)
-      if (!data) return;
-      setBlogs(data.blogs)
-      setTotal(data.total)
-
-      if (data.search) history.push(data.search)
-    }
-  }, [categoryId, blogsCategory, dispatch, search, history])
-
-
-  const handlePagination = (num: number) => {
-    const search = `?page=${num}`
-    dispatch(getBlogsByCategoryId(categoryId, search))
-  }
-
-
-
-  if (!blogs) return <Loading />;
+  if (loading) return <Loading />;
   return (
-    <div className="blogs_category">
-      <div className="show_blogs">
-        {
-          blogs.map(blog => (
-            <CardVert key={blog._id} blog={blog} />
-          ))
-        }
-      </div>
+    <div className="my-4">
+      {error && showErrMsg(error)}
 
-      {
-        total > 1 &&
-        <Pagination
-          total={total}
-          callback={handlePagination}
-        />
-      }
+      {blog && <DisplayBlog blog={blog} />}
 
     </div>
   )
 }
 
-export default BlogsByCategory
+export default DetailBlog
