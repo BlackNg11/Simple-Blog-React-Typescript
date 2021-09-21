@@ -38,6 +38,7 @@ const authCtrl = {
       const newUser = { name, account, password: passwordHash };
 
       const active_token = generateActiveToken({ newUser });
+      console.log(active_token);
 
       const url = `${CLIENT_URL}/active/${active_token}`;
 
