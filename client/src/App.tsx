@@ -11,6 +11,7 @@ import { Alert } from './components/alert/Alert'
 import { refreshToken } from './redux/actions/authAction'
 import { getCategories } from './redux/actions/categoryAction'
 import { getHomeBlogs } from './redux/actions/blogAction'
+import io from 'socket.io-client';
 
 
 const App = () => {
@@ -21,6 +22,12 @@ const App = () => {
     dispatch(refreshToken())
     dispatch(getHomeBlogs())
   }, [dispatch])
+
+  useEffect(() => {
+    const socket = io();
+    dispatch({ type: 'SOCKET', payload: socket })
+    return () => { socket.close() }
+  }, [])
 
   return (
     <div className="container">
