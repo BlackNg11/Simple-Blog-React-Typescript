@@ -12,6 +12,7 @@ import { refreshToken } from './redux/actions/authAction'
 import { getCategories } from './redux/actions/categoryAction'
 import { getHomeBlogs } from './redux/actions/blogAction'
 import io from 'socket.io-client';
+import SocketClient from './SocketClient'
 
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
 
   return (
     <div className="container">
+      <SocketClient />
       <Router>
         <Alert />
         <Header />
