@@ -17,11 +17,14 @@ import {
   DELETE_BLOGS_USER_ID,
   IDeleteBlogsUserType,
 } from "../types/blogType";
+import { checkTokenExp } from "../../utils/checkTokenExp";
 
 export const createBlog =
   (blog: IBlog, token: string) =>
   async (dispatch: Dispatch<IAlertType | ICreateBlogsUserType>) => {
     let url;
+    const result = await checkTokenExp(token, dispatch);
+    const access_token = result ? result : token;
     try {
       dispatch({ type: ALERT, payload: { loading: true } });
 
@@ -34,7 +37,7 @@ export const createBlog =
 
       const newBlog = { ...blog, thumbnail: url };
 
-      const res = await postAPI("blog", newBlog, token);
+      const res = await postAPI("blog", newBlog, access_token);
 
       dispatch({
         type: CREATE_BLOGS_USER_ID,
@@ -112,6 +115,8 @@ export const getBlogsByUserId =
 export const updateBlog =
   (blog: IBlog, token: string) => async (dispatch: Dispatch<IAlertType>) => {
     let url;
+    const result = await checkTokenExp(token, dispatch);
+    const access_token = result ? result : token;
     try {
       dispatch({ type: ALERT, payload: { loading: true } });
 
@@ -124,7 +129,7 @@ export const updateBlog =
 
       const newBlog = { ...blog, thumbnail: url };
 
-      const res = await putAPI(`blog/${newBlog._id}`, newBlog, token);
+      const res = await putAPI(`blog/${newBlog._id}`, newBlog, access_token);
 
       dispatch({ type: ALERT, payload: { success: res.data.msg } });
     } catch (err: any) {
@@ -135,13 +140,15 @@ export const updateBlog =
 export const deleteBlog =
   (blog: IBlog, token: string) =>
   async (dispatch: Dispatch<IAlertType | IDeleteBlogsUserType>) => {
+    const result = await checkTokenExp(token, dispatch);
+    const access_token = result ? result : token;
     try {
       dispatch({
         type: DELETE_BLOGS_USER_ID,
         payload: blog,
       });
 
-      await deleteAPI(`blog/${blog._id}`, token);
+      await deleteAPI(`blog/${blog._id}`, access_token);
     } catch (err: any) {
       dispatch({ type: ALERT, payload: { errors: err.response.data.msg } });
     }
